@@ -3,12 +3,13 @@ package Hw1;
 
 public class User extends Person {
     private String familyName;
-    private String familyPassword;
+    private int familyPassword;
     
-    public User(String fullName, int age, long id, String email, String familyName, String familyPassword) {
+    public User(String fullName, int age, long id, String email, String familyName, int familyPassword) {
         super(fullName, age, email, id);
         this.familyName = familyName;
         this.familyPassword = familyPassword;
+        System.out.println("Hello");
     }
     @Override
     public void addMember(Person p) {
@@ -31,11 +32,11 @@ public class User extends Person {
         this.familyName = familyName;
     }
 
-    public String getFamilyPassword() {
+    public int getFamilyPassword() {
         return familyPassword;
     }
 
-    public void setFamilyPassword(String familyPassword) {
+    public void setFamilyPassword(int familyPassword) {
         this.familyPassword = familyPassword;
     }
 }
