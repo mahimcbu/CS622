@@ -2,6 +2,8 @@ package PHI;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class User {
     private String firstName;
@@ -14,6 +16,18 @@ public class User {
     private ArrayList<HealthData> healthDataList;
 
     public User(String firstName, String lastName, String email, String password, Date dateOfBirth, String gender, String phoneNumber) {
+        if (!isValidEmail(email)) {
+            throw new IllegalArgumentException("Invalid email address");
+        }
+
+        if (!isValidPassword(password)) {
+            throw new IllegalArgumentException("Invalid password");
+        }
+
+        if (dateOfBirth.after(new Date())) {
+            throw new IllegalArgumentException("Invalid date of birth");
+        }
+
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -45,6 +59,10 @@ public class User {
     }
 
     public void setEmail(String email) {
+        if (!isValidEmail(email)) {
+            throw new IllegalArgumentException("Invalid email address");
+        }
+
         this.email = email;
     }
 
@@ -56,5 +74,25 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-    // Other getters and setters for the remaining attributes
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." +
+                            "[a-zA-Z0-9_+&*-]+)*@" +
+                            "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                            "A-Z]{2,7}$";
+
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+
+        return matcher.matches();
+    }
+
+    private boolean isValidPassword(String password) {
+        // Password must have at least 8 characters, one uppercase letter, one lowercase letter, and one digit
+        String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
+
+        Pattern pattern = Pattern.compile(passwordRegex);
+        Matcher matcher = pattern.matcher(password);
+
+        return matcher.matches();
+    }
 }

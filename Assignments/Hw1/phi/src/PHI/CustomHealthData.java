@@ -6,10 +6,12 @@ import java.util.ArrayList;
 public class CustomHealthData extends HealthData{
 	private ArrayList<String> notes;
 
-    public CustomHealthData(String name, Date date) {
-        super(name, date);
-        notes = new ArrayList<>();
-    }
+	public CustomHealthData(String name, Date date, String note) {
+	    super(name, date);
+	    notes = new ArrayList<>();
+	    notes.add(note);
+	}
+
 
     public void addNote(String note) {
         notes.add(note);

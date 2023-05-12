@@ -69,26 +69,21 @@ public class CommonHealthData extends HealthData {
     }
 
 @Override
-    public String getData() {
-        String data = "";
-        if(metric.equals("Blood Pressure")) {
-            data = systolicBP + "/" + diastolicBP;
-        }
-        else if(metric.equals("BMI")) {
-            data = String.format("%.1f", bmi);
-        }
-        else if(metric.equals("Age")) {
-            data = String.valueOf(age);
-        }
-        else if(metric.equals("Weight")) {
-            data = String.format("%.1f", weight);
-        }
-        else if(metric.equals("Cholesterol")) {
-            data = "LDL: " + ldlCholesterol + ", HDL: " + hdlCholesterol + ", Triglycerides: " + triglycerideCholesterol;
-        }
-        else if(metric.equals("Diabetes")) {
-            data = diabetes ? "Yes" : "No";
-        }
-        return data;
-    }
+
+public String getData() {
+    StringBuilder data = new StringBuilder();
+    data.append("Recorded at: ").append(getDate()).append("\n");
+    data.append("Metric: ").append(metric).append("\n");
+    data.append("Systolic BP: ").append(systolicBP).append("\n");
+    data.append("Diastolic BP: ").append(diastolicBP).append("\n");
+    data.append("BMI: ").append(bmi).append("\n");
+    data.append("Age: ").append(age).append("\n");
+    data.append("Weight: ").append(weight).append("\n");
+    data.append("LDL Cholesterol: ").append(ldlCholesterol).append("\n");
+    data.append("HDL Cholesterol: ").append(hdlCholesterol).append("\n");
+    data.append("Triglyceride Cholesterol: ").append(triglycerideCholesterol).append("\n");
+    data.append("Diabetes: ").append(diabetes ? "Yes" : "No").append("\n");
+    return data.toString();
+}
+
 }
