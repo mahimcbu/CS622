@@ -1,4 +1,4 @@
-Systolic Blood Pressure,90,120
+Systolic Blood Pressure,80,120
 Diastolic Blood Pressure,60,80
 BMI,18.5,24.9
 LDL Cholesterol,0,100
