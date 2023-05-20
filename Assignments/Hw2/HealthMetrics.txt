@@ -1,0 +1,7 @@
+Systolic Blood Pressure,90,120
+Diastolic Blood Pressure,60,80
+BMI,18.5,24.9
+LDL Cholesterol,0,100
+HDL Cholesterol,40,0
+Triglyceride Cholesterol,0,150
+Blood Glucose,70,100
