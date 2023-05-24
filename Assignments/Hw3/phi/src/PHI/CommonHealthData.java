@@ -5,7 +5,11 @@ import java.util.Date;
 public class CommonHealthData extends HealthData {
     private String metric;
     private int systolicBP;
-    private int diastolicBP;
+
+
+
+
+	private int diastolicBP;
     private int age;
     private double weight;
     private double height;
@@ -60,7 +64,13 @@ public class CommonHealthData extends HealthData {
     public int getAge() {
         return age;
     }
+    public void setSystolicBP(int systolicBP) {
+		this.systolicBP = systolicBP;
+	}
 
+	public void setDiastolicBP(int diastolicBP) {
+		this.diastolicBP = diastolicBP;
+	}
     public void setAge(int age) {
         this.age = age;
     }

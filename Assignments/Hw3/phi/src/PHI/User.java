@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class User {
+public class User<T extends HealthData<?>> {
     private String firstName;
     private String lastName;
     private String email;
@@ -13,7 +13,7 @@ public class User {
     private Date dateOfBirth;
     private String gender;
     private String phoneNumber;
-    private ArrayList<HealthData> healthDataList;
+    private ArrayList<T> healthDataList;
 
     public User(String firstName, String lastName, String email, String password, Date dateOfBirth, String gender, String phoneNumber) {
         if (!isValidEmail(email)) {
@@ -38,15 +38,33 @@ public class User {
         this.healthDataList = new ArrayList<>();
     }
 
-    public void addHealthData(HealthData healthData) {
+    public void addHealthData(T healthData) {
         healthDataList.add(healthData);
     }
 
-    public void removeHealthData(HealthData healthData) {
+    public void removeHealthData(T healthData) {
         healthDataList.remove(healthData);
     }
+    public void editHealthData(int index, T newHealthData) {
+        if (index < 0 || index >= healthDataList.size()) {
+            throw new IllegalArgumentException("Invalid index for editing health data");
+        }
 
-    public ArrayList<HealthData> getHealthDataList() {
+        HealthData<?> existingData = healthDataList.get(index);
+        String existingMetric = existingData.getMetric();
+        String newMetric = newHealthData.getMetric();
+
+        if (!existingMetric.equals(newMetric)) {
+            throw new IllegalArgumentException("Cannot edit health data at index " + index + " with a different metric type");
+        }
+        System.out.println("Editing health data at index " + index + " for " + existingMetric);
+        healthDataList.set(index, newHealthData);
+    }
+
+
+
+
+    public ArrayList<T> getHealthDataList() {
         return healthDataList;
     }
 

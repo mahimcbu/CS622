@@ -15,7 +15,7 @@ public class HealthMetricsReader {
      */
     public static double[] readIdealValue(String metric) {
         double[] idealValues = new double[2];
-        try (BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\mahim\\Documents\\GitHub\\CS622\\Assignments\\Hw2\\HealthMetrics.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\mahim\\Documents\\GitHub\\CS622\\Assignments\\Hw3\\HealthMetrics.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] values = line.split(",");
