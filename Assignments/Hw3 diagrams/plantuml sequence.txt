@@ -1,0 +1,79 @@
+@startuml
+actor User
+participant Main
+participant "HealthData" as HD
+participant "CommonHealthData" as CHD
+participant "HealthDataChecker" as HDC
+participant "HealthMetricsReader" as HMR
+
+
+User -> Main: main(args)
+activate Main
+Main -> User: User(firstName, lastName, email, password, dob, gender, phoneNumber)
+activate User
+User -> HD: addHealthData(healthData)
+activate HD
+HD -> CHD: CommonHealthData(date, metric, ...)
+activate CHD
+CHD -> CHD: validate()
+CHD -> HDC: checkBloodPressure(CHD)
+activate HDC
+HDC --> HMR: readIdealValue("blood pressure")
+activate HMR
+HDC -> HDC: perform blood pressure check
+HDC -> HDC: notify user of result
+HDC --> HMR: readIdealValue("cholesterol")
+HDC -> HDC: perform cholesterol check
+HDC -> HDC: notify user of result
+HDC -> CHD: getMetric()
+CHD -> HD: getHealthDataList()
+deactivate HDC
+deactivate HMR
+deactivate CHD
+deactivate HD
+User -> Main: printHealthData(user)
+Main -> User: getFullName()
+User -> User: getHealthDataList()
+User -> User: getFullName()
+User -> User: getHealthDataList()
+User -> User: getFullName()
+User -> User: getHealthDataList()
+User -> User: getFullName()
+User -> User: getHealthDataList()
+User -> User: getFullName()
+User -> User: getHealthDataList()
+Main -> HealthDataChecker: checkBloodPressure(commonHealthData)
+activate HDC
+HDC --> HMR: readIdealValue("blood pressure")
+activate HMR
+HDC -> HDC: perform blood pressure check
+HDC -> HDC: notify user of result
+deactivate HMR
+deactivate HDC
+Main -> HealthDataChecker: checkCholesterol(commonHealthData)
+activate HDC
+HDC --> HMR: readIdealValue("cholesterol")
+activate HMR
+HDC -> HDC: perform cholesterol check
+HDC -> HDC: notify user of result
+deactivate HMR
+deactivate HDC
+Main -> HealthDataChecker: checkBloodGlucose(commonHealthData)
+activate HDC
+HDC --> HMR: readIdealValue("blood glucose")
+activate HMR
+HDC -> HDC: perform blood glucose check
+HDC -> HDC: notify user of result
+deactivate HMR
+deactivate HDC
+Main -> HealthDataChecker: checkBMI(commonHealthData)
+activate HDC
+HDC -> HDC: calculateBMI()
+HDC --> HMR: readIdealValue("BMI")
+activate HMR
+HDC -> HDC: perform BMI check
+HDC -> HDC: notify user of result
+deactivate HMR
+deactivate HDC
+Main -> System.out: Print health data
+@enduml
