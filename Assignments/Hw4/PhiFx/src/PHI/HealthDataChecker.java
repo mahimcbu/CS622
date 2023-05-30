@@ -1,4 +1,6 @@
 package PHI;
+import application.*;
+import javafx.scene.control.Alert;
 
 
 public class HealthDataChecker {
@@ -124,9 +126,11 @@ public class HealthDataChecker {
         double idealMax = idealValues[1];
 
         if (bmi >= idealMin && bmi <= idealMax) {
+        	
             System.out.println("BMI is within the ideal range.");
         } else {
             System.out.println("BMI is not within the ideal range.");
         }
     }
+    
 }

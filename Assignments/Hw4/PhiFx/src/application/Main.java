@@ -16,15 +16,15 @@ import javafx.scene.control.DatePicker;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-import PHI.User;
 
-import java.time.LocalDate;
-import java.util.Date;
+
+import PHI.*;
 
 public class Main extends Application {
     private Stage primaryStage;
     private Scene loginScene;
     private Scene createUserScene;
+    private HealthDataEntry healthDataEntry;
 
     @Override
     public void start(Stage primaryStage) {
@@ -38,9 +38,11 @@ public class Main extends Application {
         primaryStage.setTitle("Login/Create User");
         primaryStage.show();
     }
+
     private Date convertToDate(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
+
     private void createLoginScene() {
         // Create UI components for login scene
         Label usernameLabel = new Label("Username:");
@@ -131,8 +133,8 @@ public class Main extends Application {
 
             try {
                 // Validate email and password inputs using User class methods
-                User user = new User(firstName, lastName, email, password, convertToDate(dateOfBirth), gender, phoneNumber);
-
+            	User<HealthData<?>> user = new User<>(firstName, lastName, email, password, convertToDate(dateOfBirth), gender, phoneNumber);
+                healthDataEntry = new HealthDataEntry(primaryStage, user);
                 // Perform any additional operations with the created user object
                 // For example, save the user to a database
 
@@ -144,8 +146,8 @@ public class Main extends Application {
                 alert.setContentText("User created successfully!");
                 alert.showAndWait();
 
-                // Switch back to the login scene
-                primaryStage.setScene(loginScene);
+                // Switch to the health data entry scene
+                healthDataEntry.showHealthDataEntryScene();
             } catch (IllegalArgumentException e) {
                 // Show an error message or provide feedback to the user
                 // Example: display an error dialog
@@ -157,7 +159,6 @@ public class Main extends Application {
             }
         });
     }
-
 
     public static void main(String[] args) {
         launch(args);

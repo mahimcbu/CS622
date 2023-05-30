@@ -5,10 +5,6 @@ import java.util.Date;
 public class CommonHealthData extends HealthData {
     private String metric;
     private int systolicBP;
-
-
-
-
 	private int diastolicBP;
     private int age;
     private double weight;
