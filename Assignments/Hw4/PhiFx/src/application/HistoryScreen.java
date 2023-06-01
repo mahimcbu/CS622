@@ -173,12 +173,18 @@ public class HistoryScreen {
     private void calculateAverageMetrics(List<HealthData<?>> healthDataList) {
         double totalBMI = 0;
         double totalLDL = 0;
+        double totalHDL = 0;
         int totalSystolicBP = 0;
+        int totalDiastolicBP = 0;
+
         double totalGlucoseLevel = 0;
         int bmiCount = 0;
         int ldlCount = 0;
+        int hdlCount = 0;
         int systolicBPCount = 0;
         int glucoseLevelCount = 0;
+        int diastolicBPCount = 0;
+
 
         for (HealthData<?> healthData : healthDataList) {
             if (healthData instanceof CommonHealthData) {
@@ -191,9 +197,13 @@ public class HistoryScreen {
                 } else if (metric.equals("Cholesterol")) {
                     totalLDL += commonHealthData.getLdlCholesterol();
                     ldlCount++;
+                    totalHDL += commonHealthData.getHdlCholesterol();
+                    hdlCount++;
                 } else if (metric.equals("Blood Pressure")) {
                     totalSystolicBP += commonHealthData.getSystolicBP();
                     systolicBPCount++;
+                    totalDiastolicBP += commonHealthData.getDiastolicBP();
+                    diastolicBPCount++;
                 } else if (metric.equals("Blood Glucose")) {
                     totalGlucoseLevel += commonHealthData.getGlucoseLevel();
                     glucoseLevelCount++;
@@ -210,8 +220,16 @@ public class HistoryScreen {
             double averageLDL = totalLDL / ldlCount;
             averageMetrics.append("Average LDL: ").append(String.format("%.2f", averageLDL)).append("\n");
         }
+        if (hdlCount > 0) {
+            double averageHDL = totalHDL / hdlCount;
+            averageMetrics.append("Average HDL: ").append(String.format("%.2f", averageHDL)).append("\n");
+        }
         if (systolicBPCount > 0) {
-            double averageSystolicBP = totalSystolicBP / systolicBPCount;
+            double averageDiastolicBP = totalDiastolicBP / systolicBPCount;
+            averageMetrics.append("Average Systolic BP: ").append(String.format("%.2f", averageDiastolicBP)).append("\n");
+        }
+        if (diastolicBPCount > 0) {
+            double averageSystolicBP = totalSystolicBP / diastolicBPCount;
             averageMetrics.append("Average Systolic BP: ").append(String.format("%.2f", averageSystolicBP)).append("\n");
         }
         if (glucoseLevelCount > 0) {
