@@ -5,22 +5,26 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import PHI.*;
+import PHI.CommonHealthData;
+import PHI.CustomHealthData;
+import PHI.HealthData;
+import PHI.User;
 
 public class HistoryScreen {
     private User<HealthData<?>> user;
@@ -82,7 +86,6 @@ public class HistoryScreen {
                         if (metric.equals("Blood Pressure")) {
                             Scene scene = entryScreen.showBloodPressureScene();
                             editStage.setScene(scene);
-                            
                         } else if (metric.equals("Blood Glucose")) {
                             Scene scene = entryScreen.showBloodSugarScene();
                             editStage.setScene(scene);
@@ -115,11 +118,26 @@ public class HistoryScreen {
             }
         });
 
-
         // Create the table view
         tableView = new TableView<>();
         tableView.getColumns().addAll(nameColumn, dateColumn, metricColumn, editColumn);
         tableView.setItems(data);
+
+        // Create a date picker for filtering
+        DatePicker datePicker = new DatePicker();
+        datePicker.setOnAction(event -> filterDataByDate(datePicker.getValue()));
+
+        // Create a button to clear the filter
+        Button clearFilterButton = new Button("Clear Filter");
+        clearFilterButton.setOnAction(event -> {
+            datePicker.setValue(null);
+            data.setAll(user.getHealthDataList());
+            calculateAverageMetrics(user.getHealthDataList());
+        });
+
+        // Create a label for displaying average metrics
+        Label averageMetricsLabel = new Label();
+        averageMetricsLabel.setId("averageMetricsLabel"); // Set an ID for the label
 
         // Create a back button
         Button backButton = new Button("Back");
@@ -128,12 +146,83 @@ public class HistoryScreen {
         });
 
         // Create a layout container
-        VBox root = new VBox(tableView, backButton);
+        VBox root = new VBox(datePicker, clearFilterButton, tableView, averageMetricsLabel, backButton);
         root.setSpacing(10);
         root.setPadding(new Insets(10));
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+
+        // Calculate and display the average metrics for all data
+        calculateAverageMetrics(user.getHealthDataList());
+    }
+
+    private void filterDataByDate(LocalDate selectedDate) {
+        if (selectedDate != null) {
+            List<HealthData<?>> filteredData = user.getHealthDataList().stream()
+                    .filter(data -> data.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().equals(selectedDate))
+                    .collect(Collectors.toList());
+            data.setAll(filteredData);
+            calculateAverageMetrics(filteredData);
+        } else {
+            data.setAll(user.getHealthDataList());
+            calculateAverageMetrics(user.getHealthDataList());
+        }
+    }
+
+    private void calculateAverageMetrics(List<HealthData<?>> healthDataList) {
+        double totalBMI = 0;
+        double totalLDL = 0;
+        int totalSystolicBP = 0;
+        double totalGlucoseLevel = 0;
+        int bmiCount = 0;
+        int ldlCount = 0;
+        int systolicBPCount = 0;
+        int glucoseLevelCount = 0;
+
+        for (HealthData<?> healthData : healthDataList) {
+            if (healthData instanceof CommonHealthData) {
+                CommonHealthData commonHealthData = (CommonHealthData) healthData;
+                String metric = commonHealthData.getMetric();
+
+                if (metric.equals("BMI")) {
+                    totalBMI += commonHealthData.calculateBMI();
+                    bmiCount++;
+                } else if (metric.equals("Cholesterol")) {
+                    totalLDL += commonHealthData.getLdlCholesterol();
+                    ldlCount++;
+                } else if (metric.equals("Blood Pressure")) {
+                    totalSystolicBP += commonHealthData.getSystolicBP();
+                    systolicBPCount++;
+                } else if (metric.equals("Blood Glucose")) {
+                    totalGlucoseLevel += commonHealthData.getGlucoseLevel();
+                    glucoseLevelCount++;
+                }
+            }
+        }
+
+        StringBuilder averageMetrics = new StringBuilder();
+        if (bmiCount > 0) {
+            double averageBMI = totalBMI / bmiCount;
+            averageMetrics.append("Average BMI: ").append(String.format("%.2f", averageBMI)).append("\n");
+        }
+        if (ldlCount > 0) {
+            double averageLDL = totalLDL / ldlCount;
+            averageMetrics.append("Average LDL: ").append(String.format("%.2f", averageLDL)).append("\n");
+        }
+        if (systolicBPCount > 0) {
+            double averageSystolicBP = totalSystolicBP / systolicBPCount;
+            averageMetrics.append("Average Systolic BP: ").append(String.format("%.2f", averageSystolicBP)).append("\n");
+        }
+        if (glucoseLevelCount > 0) {
+            double averageGlucoseLevel = totalGlucoseLevel / glucoseLevelCount;
+            averageMetrics.append("Average Glucose Level: ").append(String.format("%.2f", averageGlucoseLevel)).append("\n");
+        }
+
+        Label averageMetricsLabel = (Label) tableView.getScene().lookup("#averageMetricsLabel");
+        if (averageMetricsLabel != null) {
+            averageMetricsLabel.setText(averageMetrics.toString());
+        }
     }
 
     private String getMetricValue(HealthData<?> healthData) {
