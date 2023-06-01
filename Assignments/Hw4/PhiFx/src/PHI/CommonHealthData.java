@@ -1,6 +1,8 @@
 package PHI;
 
 import java.util.Date;
+import java.text.DecimalFormat;
+
 
 public class CommonHealthData extends HealthData {
     private String metric;
@@ -132,7 +134,9 @@ public class CommonHealthData extends HealthData {
     	 */
         double heightInMeters = height * 0.0254; // Convert inches to meters (1 inch = 0.0254 meters)
         double weightInKilograms = weight * 0.453592; // Convert pounds to kilograms (1 pound = 0.453592 kilograms)
-        return weightInKilograms / (heightInMeters * heightInMeters);
+        double bmi = weightInKilograms / (heightInMeters * heightInMeters);
+        DecimalFormat decimalFormat = new DecimalFormat("#.##"); // Format to two decimal places
+        return Double.parseDouble(decimalFormat.format(bmi));
     }
     public void validate() throws HealthDataException {
     	/**

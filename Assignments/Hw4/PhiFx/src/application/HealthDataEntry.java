@@ -20,6 +20,12 @@ public class HealthDataEntry {
     private Scene healthDataEntryScene;
     private Scene historyScene;
     private User<HealthData<?>> user;
+    private HealthData<?> currentHealthData;
+    
+    
+    public void setCurrentHealthData(HealthData<?> currentHealthData) {
+        this.currentHealthData = currentHealthData;
+    }
     
 
 
@@ -92,7 +98,7 @@ public class HealthDataEntry {
         });
     }
 
-    private void showBloodPressureScene() {
+    public Scene showBloodPressureScene() {
         // Create UI components for blood pressure scene
         Label titleLabel = new Label("Blood Pressure");
 
@@ -118,11 +124,12 @@ public class HealthDataEntry {
         submitButton.setOnAction(event -> {
             String name = "Blood Pressure";
             Date date = new Date();
+            Date originalDate = date;
             String metric = "Blood Pressure";
             int systolicBP = Integer.parseInt(systolicBPTextField.getText());
             int diastolicBP = Integer.parseInt(diastolicBPTextField.getText());
 
-            CommonHealthData healthDataEntry = new CommonHealthData(name, date, metric, systolicBP, diastolicBP);
+            CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, systolicBP, diastolicBP);
             try {
 				((CommonHealthData) healthDataEntry).validate();
 			} catch (HealthDataException e) {
@@ -138,9 +145,10 @@ public class HealthDataEntry {
         });
 
         primaryStage.setScene(bloodPressureScene);
+        return bloodPressureScene;
     }
 
-    private void showCholesterolScene() {
+    public Scene showCholesterolScene() {
         // Create UI components for cholesterol scene
         Label titleLabel = new Label("Cholesterol");
 
@@ -169,12 +177,13 @@ public class HealthDataEntry {
         submitButton.setOnAction(event -> {
             String name = "Cholesterol";
             Date date = new Date();
+            Date originalDate = date;
             String metric = "Cholesterol";
             int ldlCholesterol = Integer.parseInt(ldlCholesterolTextField.getText());
             int hdlCholesterol = Integer.parseInt(hdlCholesterolTextField.getText());
             int triglycerideCholesterol = Integer.parseInt(triglycerideCholesterolTextField.getText());
 
-            CommonHealthData healthDataEntry = new CommonHealthData(name, date, metric, ldlCholesterol,
+            CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, ldlCholesterol,
                     hdlCholesterol, triglycerideCholesterol);
 //            healthData.addHealthDataEntry(healthDataEntry);
             try {
@@ -192,9 +201,10 @@ public class HealthDataEntry {
         });
 
         primaryStage.setScene(cholesterolScene);
+        return cholesterolScene;
     }
 
-    private void showBMIScene() {
+    public Scene showBMIScene() {
         // Create UI components for BMI scene
         Label titleLabel = new Label("BMI");
 
@@ -220,11 +230,13 @@ public class HealthDataEntry {
         submitButton.setOnAction(event -> {
             String name = "BMI";
             Date date = new Date();
+            Date originalDate = date;
+
             String metric = "BMI";
             double weight = Double.parseDouble(weightTextField.getText());
             double height = Double.parseDouble(heightTextField.getText());
 
-            CommonHealthData healthDataEntry = new CommonHealthData(name, date, metric, weight, height);
+            CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, weight, height);
             try {
 				((CommonHealthData) healthDataEntry).validate();
 			} catch (HealthDataException e) {
@@ -238,11 +250,12 @@ public class HealthDataEntry {
         });
 
         primaryStage.setScene(bmiScene);
+        return bmiScene;
     }
 
-    private void showBloodSugarScene() {
+    public Scene showBloodSugarScene() {
         // Create UI components for blood sugar scene
-        Label titleLabel = new Label("Blood Sugar");
+        Label titleLabel = new Label("Blood Glucose");
 
         Label glucoseLevelLabel = new Label("Glucose Level:");
         TextField glucoseLevelTextField = new TextField();
@@ -260,12 +273,14 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-            String name = "Blood Sugar";
+            String name = "Blood Glucose";
             Date date = new Date();
-            String metric = "Blood Sugar";
+            Date originalDate = date;
+
+            String metric = "Blood Glucose";
             double glucoseLevel = Double.parseDouble(glucoseLevelTextField.getText());
 
-            CommonHealthData healthDataEntry = new CommonHealthData(name, date, metric, glucoseLevel);
+            CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, glucoseLevel);
             try {
 				((CommonHealthData) healthDataEntry).validate();
 			} catch (HealthDataException e) {
@@ -281,9 +296,10 @@ public class HealthDataEntry {
         });
 
         primaryStage.setScene(bloodSugarScene);
+        return bloodSugarScene;
     }
 
-    private void showCustomHealthNoteScene() {
+    public Scene showCustomHealthNoteScene() {
         // Create UI components for custom health note scene
         Label titleLabel = new Label("Custom Health Note");
 
@@ -305,10 +321,13 @@ public class HealthDataEntry {
         submitButton.setOnAction(event -> {
             String name = "Custom Health Note";
             Date date = new Date();
+            Date originalDate = date;
+
 //            String metric = "Note";
             String note = noteTextField.getText();
 
-            CustomHealthData healthDataEntry = new CustomHealthData(name, date, note);
+            CustomHealthData healthDataEntry = new CustomHealthData(name, originalDate, note);
+            user.addHealthData(healthDataEntry);
 //            healthData.addHealthDataEntry(healthDataEntry);
 
             showHealthDataEntryScene();
@@ -316,6 +335,7 @@ public class HealthDataEntry {
         });
 
         primaryStage.setScene(customHealthNoteScene);
+        return customHealthNoteScene;
     }
 
     private void showHistoryScene() {
@@ -358,4 +378,7 @@ public class HealthDataEntry {
         alert.setContentText("Health data entry saved successfully!");
         alert.showAndWait();
     }
+    
+
+    
 }
