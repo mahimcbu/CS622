@@ -1,5 +1,4 @@
-package PHI;
-import application.*;
+package application;
 import javafx.scene.control.Alert;
 
 

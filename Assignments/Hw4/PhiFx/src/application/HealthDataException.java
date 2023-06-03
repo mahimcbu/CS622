@@ -1,4 +1,4 @@
-package PHI;
+package application;
 
 public class HealthDataException extends Exception {
     public HealthDataException(String message) {

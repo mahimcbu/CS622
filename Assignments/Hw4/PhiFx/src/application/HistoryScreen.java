@@ -21,15 +21,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import PHI.CommonHealthData;
-import PHI.CustomHealthData;
-import PHI.HealthData;
-import PHI.User;
-
 public class HistoryScreen {
     private User<HealthData<?>> user;
-    private TableView<HealthData<?>> tableView;
-    private ObservableList<HealthData<?>> data;
+    TableView<HealthData<?>> tableView;
+    ObservableList<HealthData<?>> data;
 
     public HistoryScreen(User<HealthData<?>> user) {
         this.user = user;
@@ -170,7 +165,7 @@ public class HistoryScreen {
         }
     }
 
-    private void calculateAverageMetrics(List<HealthData<?>> healthDataList) {
+    void calculateAverageMetrics(List<HealthData<?>> healthDataList) {
         double totalBMI = 0;
         double totalLDL = 0;
         double totalHDL = 0;

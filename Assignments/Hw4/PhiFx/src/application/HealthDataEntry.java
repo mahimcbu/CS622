@@ -10,7 +10,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import PHI.*;
 
 
 import java.util.Date;
@@ -28,7 +27,12 @@ public class HealthDataEntry {
     }
     
 
-
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+    public User<HealthData<?>> getUser() {
+        return user;
+    }
     private HealthData<CommonHealthData> healthData;
 
     public HealthDataEntry(Stage primaryStage, User<HealthData<?>> user) {

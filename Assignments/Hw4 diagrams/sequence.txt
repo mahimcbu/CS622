@@ -1,0 +1,82 @@
+@startuml
+actor User
+participant Main
+participant "HealthData" as HD
+participant "CommonHealthData" as CHD
+participant "HealthDataChecker" as HDC
+participant "HealthMetricsReader" as HMR
+participant HealthDataEntry
+participant HistoryScreen
+
+User -> Main: main(args)
+activate Main
+Main -> User: User(firstName, lastName, email, password, dob, gender, phoneNumber)
+activate User
+User -> HD: addHealthData(healthData)
+activate HD
+HD -> CHD: CommonHealthData(date, metric, ...)
+activate CHD
+CHD -> CHD: validate()
+CHD -> HDC: checkBloodPressure(CHD)
+activate HDC
+HDC --> HMR: readIdealValue("blood pressure")
+activate HMR
+HDC -> HDC: perform blood pressure check
+HDC -> HDC: notify user of result
+HDC --> HMR: readIdealValue("cholesterol")
+HDC -> HDC: perform cholesterol check
+HDC -> HDC: notify user of result
+HDC -> CHD: getMetric()
+CHD -> HD: getHealthDataList()
+deactivate HDC
+deactivate HMR
+deactivate CHD
+deactivate HD
+User -> HealthDataEntry: showHealthDataEntryScene()
+activate HealthDataEntry
+HealthDataEntry -> HealthDataEntry: createHealthDataEntryScene()
+User --> HealthDataEntry: setCurrentHealthData(currentHealthData)
+activate User
+activate HealthDataEntry
+HealthDataEntry -> User: getFullName()
+User --> HealthDataEntry: getFullName()
+deactivate User
+HealthDataEntry -> HealthDataEntry: showBloodPressureScene()
+activate HealthDataEntry
+HealthDataEntry -> HealthDataChecker: checkBloodPressure(commonHealthData)
+activate HDC
+HDC --> HMR: readIdealValue("blood pressure")
+activate HMR
+HDC -> HDC: perform blood pressure check
+HDC -> HDC: notify user of result
+deactivate HMR
+deactivate HDC
+HealthDataEntry --> HealthDataEntry: showSuccessMessage()
+HealthDataEntry -> HealthDataEntry: showHistoryScreen()
+activate HealthDataEntry
+HealthDataEntry -> HistoryScreen: showHistoryScreen()
+activate HistoryScreen
+HistoryScreen -> User: getHealthDataList()
+activate User
+User --> HistoryScreen: getHealthDataList()
+deactivate User
+HistoryScreen -> HistoryScreen: display()
+HistoryScreen --> HealthDataEntry: display()
+deactivate HistoryScreen
+HealthDataEntry --> User: getFullName()
+activate User
+User --> HealthDataEntry: getFullName()
+deactivate User
+HealthDataEntry --> Main: printHealthData(user)
+activate Main
+Main -> User: getFullName()
+activate User
+User --> Main: getFullName()
+deactivate User
+Main -> User: getHealthDataList()
+activate User
+User --> Main: getHealthDataList()
+deactivate User
+Main -> System.out: Print health data
+deactivate Main
+@enduml
