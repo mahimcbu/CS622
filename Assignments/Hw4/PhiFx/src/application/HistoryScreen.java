@@ -25,12 +25,21 @@ public class HistoryScreen {
     private User<HealthData<?>> user;
     TableView<HealthData<?>> tableView;
     ObservableList<HealthData<?>> data;
-
+    /**
+     * Constructs a new HistoryScreen object.
+     * @param user the User object for which to display the health data history
+     * Pre: HealthdataEntry scene is working properly
+     * PRECONDITION: user is not null
+     */
     public HistoryScreen(User<HealthData<?>> user) {
         this.user = user;
         data = FXCollections.observableArrayList(user.getHealthDataList());
     }
-
+    /**
+     * Displays the health data history screen.
+     * Pre: History button in the healthdataentry exists and the showhistoryscreen is functioning
+     * POSTCONDITION: The health data history screen is displayed on a new Stage.
+     */
     public void display() {
         Stage stage = new Stage();
         stage.setTitle("Health Data History");
@@ -151,7 +160,12 @@ public class HistoryScreen {
         // Calculate and display the average metrics for all data
         calculateAverageMetrics(user.getHealthDataList());
     }
-
+    /**
+     * Filters the health data entries based on the selected date.
+     * @param selectedDate the selected date for filtering
+     * PRECONDITION: selectedDate is a valid LocalDate object or null
+     * POSTCONDITION: The health data entries in the TableView are filtered based on the selected date.
+     */
     private void filterDataByDate(LocalDate selectedDate) {
         if (selectedDate != null) {
             List<HealthData<?>> filteredData = user.getHealthDataList().stream()
@@ -164,7 +178,12 @@ public class HistoryScreen {
             calculateAverageMetrics(user.getHealthDataList());
         }
     }
-
+    /**
+     * Calculates and displays the average metrics for the given health data list.
+     * @param healthDataList the list of health data entries
+     * PRECONDITION: healthDataList is not null
+     * POSTCONDITION: The average metrics are calculated and displayed in the averageMetricsLabel.
+     */
     void calculateAverageMetrics(List<HealthData<?>> healthDataList) {
         double totalBMI = 0;
         double totalLDL = 0;
@@ -237,7 +256,13 @@ public class HistoryScreen {
             averageMetricsLabel.setText(averageMetrics.toString());
         }
     }
-
+    /**
+     * Retrieves the metric value for a health data entry.
+     * @param healthData the health data entry
+     * @return the metric value as a string
+     * PRECONDITION: healthData is not null
+     * POSTCONDITION: The metric value for the health data entry is returned as a string.
+     */
     private String getMetricValue(HealthData<?> healthData) {
         if (healthData instanceof CommonHealthData) {
             CommonHealthData commonHealthData = (CommonHealthData) healthData;

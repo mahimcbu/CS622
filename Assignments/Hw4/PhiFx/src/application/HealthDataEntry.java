@@ -34,22 +34,34 @@ public class HealthDataEntry {
         return user;
     }
     private HealthData<CommonHealthData> healthData;
-
+    /**
+     * Creates a new instance of HealthDataEntry.
+     * @param primaryStage the primary stage for the application
+     * @param user the user associated with the health data
+     * PRECONDITION: primaryStage is not null
+     * PRECONDITION: user is not null
+     */
     public HealthDataEntry(Stage primaryStage, User<HealthData<?>> user) {
         this.primaryStage = primaryStage;
         this.user = user;
-//        healthData = new HealthData<>();
-
         createHealthDataEntryScene();
-//        createHistoryScene();
-    }
 
+    }
+    /**
+     * Displays the health data entry scene.
+     * PreCondiotn: User created successfully 
+     * POSTCONDITION: The health data entry scene is shown on the primary stage.
+     */
     public void showHealthDataEntryScene() {
         primaryStage.setScene(healthDataEntryScene);
         primaryStage.setTitle("Health Data Entry");
         primaryStage.show();
     }
-
+    /**
+     * Creates the health data entry scene and sets up event handlers for the buttons.
+     * Precondition: ShowHealthDataEntryScene works
+     * POSTCONDITION: The health data entry scene is created with all the necessary UI components and event handlers.
+     */
     private void createHealthDataEntryScene() {
         // Create UI components for health data entry scene
         Label titleLabel = new Label("Health Data Entry");
@@ -101,7 +113,11 @@ public class HealthDataEntry {
         	showHistoryScreen();
         });
     }
-
+    /**
+     * Shows the blood pressure scene for data entry.
+     * Precondition: Button exist and click-able
+     * POSTCONDITION: A new Scene object for blood pressure entry is created and returned.
+     */
     public Scene showBloodPressureScene() {
         // Create UI components for blood pressure scene
         Label titleLabel = new Label("Blood Pressure");
@@ -151,7 +167,11 @@ public class HealthDataEntry {
         primaryStage.setScene(bloodPressureScene);
         return bloodPressureScene;
     }
-
+    /**
+     * Shows the Cholesterol scene for data entry.
+     * Precondition: Button exist and click-able
+     * POSTCONDITION: A new Scene object for cholesterol entry is created and returned.
+     */
     public Scene showCholesterolScene() {
         // Create UI components for cholesterol scene
         Label titleLabel = new Label("Cholesterol");
@@ -207,7 +227,11 @@ public class HealthDataEntry {
         primaryStage.setScene(cholesterolScene);
         return cholesterolScene;
     }
-
+    /**
+     * Shows the BMI scene for data entry.
+     * Precondition: Button exist and click-able
+     * POSTCONDITION: A new Scene object for BMI entry is created and returned.
+     */
     public Scene showBMIScene() {
         // Create UI components for BMI scene
         Label titleLabel = new Label("BMI");
@@ -256,7 +280,11 @@ public class HealthDataEntry {
         primaryStage.setScene(bmiScene);
         return bmiScene;
     }
-
+    /**
+     * Shows the blood sugar scene for data entry.
+     * Precondition: Button exist and click-able
+     * POSTCONDITION: A new Scene object for blood sugar entry is created and returned.
+     */
     public Scene showBloodSugarScene() {
         // Create UI components for blood sugar scene
         Label titleLabel = new Label("Blood Glucose");
@@ -302,7 +330,11 @@ public class HealthDataEntry {
         primaryStage.setScene(bloodSugarScene);
         return bloodSugarScene;
     }
-
+    /**
+     * Shows the custom health note scene for data entry.
+     * Precondition: Button exist and click-able
+     * POSTCONDITION: A new Scene object for custom health note entry is created and returned.
+     */
     public Scene showCustomHealthNoteScene() {
         // Create UI components for custom health note scene
         Label titleLabel = new Label("Custom Health Note");
@@ -342,35 +374,40 @@ public class HealthDataEntry {
         return customHealthNoteScene;
     }
 
-    private void showHistoryScene() {
-        // Create UI components for history scene
-        Label titleLabel = new Label("Health Data History");
-
-        StringBuilder historyText = new StringBuilder();
-//        for (CommonHealthData entry : healthData.getHealthDataEntries()) {
-//            historyText.append(entry.toString()).append("\n");
-//        }
-
-        Label historyLabel = new Label(historyText.toString());
-
-        Button backButton = new Button("Back");
-
-        // Create layout container for history scene
-        VBox root = new VBox(10);
-        root.setAlignment(Pos.CENTER);
-        root.setPadding(new Insets(10));
-        root.getChildren().addAll(titleLabel, historyLabel, backButton);
-
-        // Create history scene
-        historyScene = new Scene(root, 400, 300);
-
-        // Handle back button click event
-        backButton.setOnAction(event -> {
-            showHealthDataEntryScene();
-        });
-
-        primaryStage.setScene(historyScene);
-    }
+//    private void showHistoryScene() {
+//        // Create UI components for history scene
+//        Label titleLabel = new Label("Health Data History");
+//
+//        StringBuilder historyText = new StringBuilder();
+////        for (CommonHealthData entry : healthData.getHealthDataEntries()) {
+////            historyText.append(entry.toString()).append("\n");
+////        }
+//
+//        Label historyLabel = new Label(historyText.toString());
+//
+//        Button backButton = new Button("Back");
+//
+//        // Create layout container for history scene
+//        VBox root = new VBox(10);
+//        root.setAlignment(Pos.CENTER);
+//        root.setPadding(new Insets(10));
+//        root.getChildren().addAll(titleLabel, historyLabel, backButton);
+//
+//        // Create history scene
+//        historyScene = new Scene(root, 400, 300);
+//
+//        // Handle back button click event
+//        backButton.setOnAction(event -> {
+//            showHealthDataEntryScene();
+//        });
+//
+//        primaryStage.setScene(historyScene);
+//    }
+    /**
+     * Shows the history screen with the user's health data entries.
+     * Precondition: Button exist and click-able
+     * POSTCONDITION: The history screen is shown on the primary stage.
+     */
     private void showHistoryScreen() {
         HistoryScreen historyScreen = new HistoryScreen(user);
         historyScreen.display();
