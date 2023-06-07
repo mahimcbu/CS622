@@ -80,6 +80,9 @@ public class Main extends Application {
             String username = usernameTextField.getText();
             String password = passwordTextField.getText();
             System.out.println("Logging in with username: " + username + ", password: " + password);
+            System.out.println("Use create user button for now as the login will be available after database connectivity is complete");
+//            healthDataEntry = new HealthDataEntry(primaryStage, user);
+//            healthDataEntry.showHealthDataEntryScene();
         });
     }
 

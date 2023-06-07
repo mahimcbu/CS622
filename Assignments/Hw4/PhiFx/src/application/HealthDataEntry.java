@@ -20,6 +20,8 @@ public class HealthDataEntry {
     private Scene healthDataEntryScene;
     private TableView<HealthData<?>> tableView;
     private User<HealthData<?>> user;
+ 
+
 
 
     public void setCurrentHealthData(HealthData<?> currentHealthData) {
@@ -367,6 +369,7 @@ public class HealthDataEntry {
                         e.printStackTrace();
                     }
                 }
+            	
                 tableView.refresh(); // Refresh the table view to reflect the changes
                 Stage primaryStage = (Stage) bloodSugarScene.getWindow();
                 primaryStage.close();
