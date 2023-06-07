@@ -25,7 +25,6 @@ public class HistoryScreen {
     private User<HealthData<?>> user;
     TableView<HealthData<?>> tableView;
     ObservableList<HealthData<?>> data;
-    
     /**
      * Constructs a new HistoryScreen object.
      * @param user the User object for which to display the health data history
@@ -89,22 +88,20 @@ public class HistoryScreen {
                         String metric = commonHealthData.getMetric();
 
                         if (metric.equals("Blood Pressure")) {
-                            Scene scene = entryScreen.showBloodPressureScene(commonHealthData, true, tableView);
+                            Scene scene = entryScreen.showBloodPressureScene();
                             editStage.setScene(scene);
                         } else if (metric.equals("Blood Glucose")) {
-                        	Scene scene = entryScreen.showBloodSugarScene(commonHealthData, true, tableView); // Pass the existing health data and the table view
+                            Scene scene = entryScreen.showBloodSugarScene();
                             editStage.setScene(scene);
                         } else if (metric.equals("BMI")) {
-                            Scene scene = entryScreen.showBMIScene(commonHealthData, true, tableView);
+                            Scene scene = entryScreen.showBMIScene();
                             editStage.setScene(scene);
                         } else if (metric.equals("Cholesterol")) {
-                            Scene scene = entryScreen.showCholesterolScene(commonHealthData, true, tableView);
+                            Scene scene = entryScreen.showCholesterolScene();
                             editStage.setScene(scene);
                         }
                     } else if (healthData instanceof CustomHealthData) {
-                    	CustomHealthData customHealthData = (CustomHealthData) healthData;
-
-                        Scene scene = entryScreen.showCustomHealthNoteScene(customHealthData, true, tableView);
+                        Scene scene = entryScreen.showCustomHealthNoteScene();
                         editStage.setScene(scene);
                     }
 

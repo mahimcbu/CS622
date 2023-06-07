@@ -7,7 +7,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -18,11 +17,13 @@ import java.util.Date;
 public class HealthDataEntry {
     private Stage primaryStage;
     private Scene healthDataEntryScene;
-    private TableView<HealthData<?>> tableView;
+    private Scene historyScene;
     private User<HealthData<?>> user;
-
-
+    private HealthData<?> currentHealthData;
+    
+    
     public void setCurrentHealthData(HealthData<?> currentHealthData) {
+        this.currentHealthData = currentHealthData;
     }
     
 
@@ -84,27 +85,27 @@ public class HealthDataEntry {
 
         // Handle blood pressure button click event
         bloodPressureButton.setOnAction(event -> {
-            showBloodPressureScene(null, false, tableView);
+            showBloodPressureScene();
         });
 
         // Handle cholesterol button click event
         cholesterolButton.setOnAction(event -> {
-            showCholesterolScene(null, false, tableView);
+            showCholesterolScene();
         });
 
         // Handle BMI button click event
         bmiButton.setOnAction(event -> {
-            showBMIScene(null, false, tableView);
+            showBMIScene();
         });
 
         // Handle blood sugar button click event
         bloodSugarButton.setOnAction(event -> {
-            showBloodSugarScene(null, false, tableView);
+            showBloodSugarScene();
         });
 
         // Handle custom health note button click event
         customHealthNoteButton.setOnAction(event -> {
-            showCustomHealthNoteScene(null, false, tableView);
+            showCustomHealthNoteScene();
         });
 
         // Handle history button click event
@@ -117,7 +118,7 @@ public class HealthDataEntry {
      * Precondition: Button exist and click-able
      * POSTCONDITION: A new Scene object for blood pressure entry is created and returned.
      */
-    public Scene showBloodPressureScene(CommonHealthData existingHealthData, boolean isEdit, TableView<HealthData<?>> tableView) {
+    public Scene showBloodPressureScene() {
         // Create UI components for blood pressure scene
         Label titleLabel = new Label("Blood Pressure");
 
@@ -141,28 +142,12 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-            int systolicBP = Integer.parseInt(systolicBPTextField.getText());
-            int diastolicBP = Integer.parseInt(diastolicBPTextField.getText());
-            if (isEdit) {
-            	if (existingHealthData instanceof CommonHealthData) {
-                    CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
-                    commonHealthData.setSystolicBP(systolicBP);
-                    commonHealthData.setDiastolicBP(diastolicBP);
-                    try {
-                        commonHealthData.validate();
-                    } catch (HealthDataException e) {
-                        e.printStackTrace();
-                    }
-                }
-                tableView.refresh(); // Refresh the table view to reflect the changes
-                Stage primaryStage = (Stage) bloodPressureScene.getWindow();
-                primaryStage.close();
-            } else {
             String name = "Blood Pressure";
             Date date = new Date();
             Date originalDate = date;
             String metric = "Blood Pressure";
-    
+            int systolicBP = Integer.parseInt(systolicBPTextField.getText());
+            int diastolicBP = Integer.parseInt(diastolicBPTextField.getText());
 
             CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, systolicBP, diastolicBP);
             try {
@@ -176,7 +161,7 @@ public class HealthDataEntry {
 
 
             showHealthDataEntryScene();
-            }
+            showSuccessMessage();
         });
 
         primaryStage.setScene(bloodPressureScene);
@@ -187,7 +172,7 @@ public class HealthDataEntry {
      * Precondition: Button exist and click-able
      * POSTCONDITION: A new Scene object for cholesterol entry is created and returned.
      */
-    public Scene showCholesterolScene(CommonHealthData existingHealthData, boolean isEdit, TableView<HealthData<?>> tableView) {
+    public Scene showCholesterolScene() {
         // Create UI components for cholesterol scene
         Label titleLabel = new Label("Cholesterol");
 
@@ -214,30 +199,13 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-            int ldlCholesterol = Integer.parseInt(ldlCholesterolTextField.getText());
-            int hdlCholesterol = Integer.parseInt(hdlCholesterolTextField.getText());
-            int triglycerideCholesterol = Integer.parseInt(triglycerideCholesterolTextField.getText());
-            if (isEdit) {
-            	if (existingHealthData instanceof CommonHealthData) {
-                    CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
-                    commonHealthData.setLdlCholesterol(ldlCholesterol);
-                    commonHealthData.setHdlCholesterol(hdlCholesterol);
-                    commonHealthData.setTriglycerideCholesterol(triglycerideCholesterol);
-                    try {
-                        commonHealthData.validate();
-                    } catch (HealthDataException e) {
-                        e.printStackTrace();
-                    }
-                }
-                tableView.refresh(); // Refresh the table view to reflect the changes
-                Stage primaryStage = (Stage) cholesterolScene.getWindow();
-                primaryStage.close();
-            } else {
             String name = "Cholesterol";
             Date date = new Date();
             Date originalDate = date;
             String metric = "Cholesterol";
-
+            int ldlCholesterol = Integer.parseInt(ldlCholesterolTextField.getText());
+            int hdlCholesterol = Integer.parseInt(hdlCholesterolTextField.getText());
+            int triglycerideCholesterol = Integer.parseInt(triglycerideCholesterolTextField.getText());
 
             CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, ldlCholesterol,
                     hdlCholesterol, triglycerideCholesterol);
@@ -253,7 +221,7 @@ public class HealthDataEntry {
 
 
             showHealthDataEntryScene();
-            }
+            showSuccessMessage();
         });
 
         primaryStage.setScene(cholesterolScene);
@@ -264,7 +232,7 @@ public class HealthDataEntry {
      * Precondition: Button exist and click-able
      * POSTCONDITION: A new Scene object for BMI entry is created and returned.
      */
-    public Scene showBMIScene(CommonHealthData existingHealthData, boolean isEdit, TableView<HealthData<?>> tableView) {
+    public Scene showBMIScene() {
         // Create UI components for BMI scene
         Label titleLabel = new Label("BMI");
 
@@ -288,29 +256,13 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-            double weight = Double.parseDouble(weightTextField.getText());
-            double height = Double.parseDouble(heightTextField.getText());
-            if (isEdit) {
-            	if (existingHealthData instanceof CommonHealthData) {
-                    CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
-                    commonHealthData.setWeight(weight);
-                    commonHealthData.setHeight(height);
-                    try {
-                        commonHealthData.validate();
-                    } catch (HealthDataException e) {
-                        e.printStackTrace();
-                    }
-                }
-                tableView.refresh(); // Refresh the table view to reflect the changes
-                Stage primaryStage = (Stage) bmiScene.getWindow();
-                primaryStage.close();
-            } else {
             String name = "BMI";
             Date date = new Date();
             Date originalDate = date;
 
             String metric = "BMI";
-
+            double weight = Double.parseDouble(weightTextField.getText());
+            double height = Double.parseDouble(heightTextField.getText());
 
             CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, weight, height);
             try {
@@ -322,20 +274,18 @@ public class HealthDataEntry {
             user.addHealthData(healthDataEntry);
             HealthDataChecker.checkBMI(healthDataEntry);
             showHealthDataEntryScene();
-            }
+            showSuccessMessage();
         });
 
         primaryStage.setScene(bmiScene);
         return bmiScene;
     }
-
-
     /**
      * Shows the blood sugar scene for data entry.
      * Precondition: Button exist and click-able
      * POSTCONDITION: A new Scene object for blood sugar entry is created and returned.
      */
-    public Scene showBloodSugarScene(CommonHealthData existingHealthData, boolean isEdit, TableView<HealthData<?>> tableView) {
+    public Scene showBloodSugarScene() {
         // Create UI components for blood sugar scene
         Label titleLabel = new Label("Blood Glucose");
 
@@ -355,56 +305,37 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
+            String name = "Blood Glucose";
+            Date date = new Date();
+            Date originalDate = date;
+
+            String metric = "Blood Glucose";
             double glucoseLevel = Double.parseDouble(glucoseLevelTextField.getText());
 
-            if (isEdit) {
-            	if (existingHealthData instanceof CommonHealthData) {
-                    CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
-                    commonHealthData.setGlucoseLevel(glucoseLevel);
-                    try {
-                        commonHealthData.validate();
-                    } catch (HealthDataException e) {
-                        e.printStackTrace();
-                    }
-                }
-                tableView.refresh(); // Refresh the table view to reflect the changes
-                Stage primaryStage = (Stage) bloodSugarScene.getWindow();
-                primaryStage.close();
-            } else {
-                // Create a new health data entry
-                String name = "Blood Glucose";
-                Date date = new Date();
-                Date originalDate = date;
+            CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, glucoseLevel);
+            try {
+				((CommonHealthData) healthDataEntry).validate();
+			} catch (HealthDataException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            user.addHealthData(healthDataEntry);
+            HealthDataChecker.checkBloodGlucose(healthDataEntry);
 
-                String metric = "Blood Glucose";
 
-                // Create a new CommonHealthData object
-                CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, glucoseLevel);
-                try {
-                    healthDataEntry.validate();
-                } catch (HealthDataException e) {
-                    e.printStackTrace();
-                }
-                user.addHealthData(healthDataEntry);
-                HealthDataChecker.checkBloodGlucose(healthDataEntry);
-                showHealthDataEntryScene();
-
-            }
-            
-            
-
+            showHealthDataEntryScene();
+            showSuccessMessage();
         });
 
         primaryStage.setScene(bloodSugarScene);
         return bloodSugarScene;
     }
-
     /**
      * Shows the custom health note scene for data entry.
      * Precondition: Button exist and click-able
      * POSTCONDITION: A new Scene object for custom health note entry is created and returned.
      */
-    public Scene showCustomHealthNoteScene(CustomHealthData existingHealthData, boolean isEdit, TableView<HealthData<?>> tableView) {
+    public Scene showCustomHealthNoteScene() {
         // Create UI components for custom health note scene
         Label titleLabel = new Label("Custom Health Note");
 
@@ -421,25 +352,15 @@ public class HealthDataEntry {
 
         // Create custom health note scene
         Scene customHealthNoteScene = new Scene(root, 400, 300);
-        String note = noteTextField.getText();
+
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-        	   if (isEdit) {
-               	if (existingHealthData instanceof CustomHealthData) {
-                       CustomHealthData customHealthData = (CustomHealthData) existingHealthData;
-//                       customHealthData.setNotes(note);
-
-                   }
-                   tableView.refresh(); // Refresh the table view to reflect the changes
-                   Stage primaryStage = (Stage) customHealthNoteScene.getWindow();
-                   primaryStage.close();
-               } else {
             String name = "Custom Health Note";
             Date date = new Date();
             Date originalDate = date;
 
 //            String metric = "Note";
-            
+            String note = noteTextField.getText();
 
             CustomHealthData healthDataEntry = new CustomHealthData(name, originalDate, note);
             user.addHealthData(healthDataEntry);
@@ -447,14 +368,41 @@ public class HealthDataEntry {
 
             showHealthDataEntryScene();
             showSuccessMessage();
-               }
         });
 
         primaryStage.setScene(customHealthNoteScene);
         return customHealthNoteScene;
     }
 
-
+//    private void showHistoryScene() {
+//        // Create UI components for history scene
+//        Label titleLabel = new Label("Health Data History");
+//
+//        StringBuilder historyText = new StringBuilder();
+////        for (CommonHealthData entry : healthData.getHealthDataEntries()) {
+////            historyText.append(entry.toString()).append("\n");
+////        }
+//
+//        Label historyLabel = new Label(historyText.toString());
+//
+//        Button backButton = new Button("Back");
+//
+//        // Create layout container for history scene
+//        VBox root = new VBox(10);
+//        root.setAlignment(Pos.CENTER);
+//        root.setPadding(new Insets(10));
+//        root.getChildren().addAll(titleLabel, historyLabel, backButton);
+//
+//        // Create history scene
+//        historyScene = new Scene(root, 400, 300);
+//
+//        // Handle back button click event
+//        backButton.setOnAction(event -> {
+//            showHealthDataEntryScene();
+//        });
+//
+//        primaryStage.setScene(historyScene);
+//    }
     /**
      * Shows the history screen with the user's health data entries.
      * Precondition: Button exist and click-able

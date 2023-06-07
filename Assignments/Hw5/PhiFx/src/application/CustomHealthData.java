@@ -21,12 +21,7 @@ public class CustomHealthData extends HealthData{
         return notes;
     }
 
-    public void setNotes(ArrayList<String> notes) {
-		this.notes = notes;
-	}
-
-
-	@Override
+    @Override
     public String getMetric() {
         return "Notes";
     }

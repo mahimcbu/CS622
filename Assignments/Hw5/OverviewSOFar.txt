@@ -1,0 +1,24 @@
+Here's an overview of the sequence diagram:
+
+The User interacts with the Main class, which starts the application and creates a User object with relevant information.
+
+The User adds a new HealthData entry by calling the addHealthData(healthData) method. This triggers the creation of a CommonHealthData object.
+
+The CommonHealthData object validates itself by calling the validate() method. It then invokes the HealthDataChecker to perform various health checks, such as blood pressure and cholesterol checks.
+
+The HealthDataChecker utilizes the HealthMetricsReader to obtain ideal values for the health metrics being checked. It performs the necessary checks and notifies the user of the results.
+
+The HealthDataEntry class is responsible for displaying the health data entry scene and interacting with the user. It creates the scene and allows the user to enter blood pressure data.
+
+The HealthDataEntry class invokes the HealthDataChecker to perform the blood pressure check on the CommonHealthData object. This involves reading the ideal value for blood pressure from the HealthMetricsReader and performing the check.
+
+After performing the checks, the HealthDataEntry class displays a success message to the user.
+
+The HealthDataEntry class also provides an option to view the history screen. It communicates with the HistoryScreen class to display the history of health data entries.
+
+The HistoryScreen retrieves the health data list from the User and displays it in a table. It calculates average metrics and interacts with the User to get the full name for display purposes.
+
+Finally, the Main class prints the health data to the console.
+
+The sequence diagram illustrates the flow of interactions between different components in your PHI app. It shows how the User, HealthData, CommonHealthData, HealthDataChecker, HealthMetricsReader, HealthDataEntry, 
+and HistoryScreen classes collaborate to handle health data entry, validation, checks, and history display.
