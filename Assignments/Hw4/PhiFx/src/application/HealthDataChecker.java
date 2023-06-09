@@ -19,9 +19,8 @@ public class HealthDataChecker {
         int diastolic = common.getDiastolicBP();
 
         // Read ideal range from the HealthMetrics text file
+     // Read ideal range from the HealthMetrics text file concurrently
         double[] idealValues = HealthMetricsReader.readIdealValue("Systolic Blood Pressure");
-
-      
         double idealMinSystolic = idealValues[0];
         double idealMaxSystolic = idealValues[1];
         double idealMinDiastolic = HealthMetricsReader.readIdealValue("Diastolic Blood Pressure")[0];
@@ -90,7 +89,7 @@ public class HealthDataChecker {
         double glucoseLevel = common.getGlucoseLevel();
 
         // Read ideal range from the HealthMetrics text file
-        double[] idealValues = HealthMetricsReader.readIdealValue("Blood Glucose");
+        double[] idealValues = HealthMetricsReader.readIdealValue("BMI");
 
         // Compare with the ideal range
         double idealMin = idealValues[0];

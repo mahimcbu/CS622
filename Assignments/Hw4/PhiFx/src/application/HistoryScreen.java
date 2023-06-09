@@ -83,7 +83,7 @@ public class HistoryScreen {
                     editStage.setTitle("Edit Health Data");
 
                     HealthDataEntry entryScreen = new HealthDataEntry(editStage, user);
-                    entryScreen.setCurrentHealthData(healthData); // Set the current health data
+//                    entryScreen.setCurrentHealthData(healthData); // Set the current health data
 
                     if (healthData instanceof CommonHealthData) {
                         CommonHealthData commonHealthData = (CommonHealthData) healthData;

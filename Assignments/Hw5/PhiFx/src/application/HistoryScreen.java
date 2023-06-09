@@ -3,6 +3,7 @@ package application;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -25,6 +26,7 @@ public class HistoryScreen {
     private User<HealthData<?>> user;
     TableView<HealthData<?>> tableView;
     ObservableList<HealthData<?>> data;
+    
     /**
      * Constructs a new HistoryScreen object.
      * @param user the User object for which to display the health data history
@@ -81,27 +83,29 @@ public class HistoryScreen {
                     editStage.setTitle("Edit Health Data");
 
                     HealthDataEntry entryScreen = new HealthDataEntry(editStage, user);
-                    entryScreen.setCurrentHealthData(healthData); // Set the current health data
+//                    entryScreen.setCurrentHealthData(healthData); // Set the current health data
 
                     if (healthData instanceof CommonHealthData) {
                         CommonHealthData commonHealthData = (CommonHealthData) healthData;
                         String metric = commonHealthData.getMetric();
 
                         if (metric.equals("Blood Pressure")) {
-                            Scene scene = entryScreen.showBloodPressureScene();
+                            Scene scene = entryScreen.showBloodPressureScene(commonHealthData, true, tableView);
                             editStage.setScene(scene);
                         } else if (metric.equals("Blood Glucose")) {
-                            Scene scene = entryScreen.showBloodSugarScene();
+                        	Scene scene = entryScreen.showBloodSugarScene(commonHealthData, true, tableView); // Pass the existing health data and the table view
                             editStage.setScene(scene);
                         } else if (metric.equals("BMI")) {
-                            Scene scene = entryScreen.showBMIScene();
+                            Scene scene = entryScreen.showBMIScene(commonHealthData, true, tableView);
                             editStage.setScene(scene);
                         } else if (metric.equals("Cholesterol")) {
-                            Scene scene = entryScreen.showCholesterolScene();
+                            Scene scene = entryScreen.showCholesterolScene(commonHealthData, true, tableView);
                             editStage.setScene(scene);
                         }
                     } else if (healthData instanceof CustomHealthData) {
-                        Scene scene = entryScreen.showCustomHealthNoteScene();
+                    	CustomHealthData customHealthData = (CustomHealthData) healthData;
+
+                        Scene scene = entryScreen.showCustomHealthNoteScene(customHealthData, true, tableView);
                         editStage.setScene(scene);
                     }
 
@@ -159,6 +163,7 @@ public class HistoryScreen {
 
         // Calculate and display the average metrics for all data
         calculateAverageMetrics(user.getHealthDataList());
+
     }
     /**
      * Filters the health data entries based on the selected date.
@@ -224,7 +229,7 @@ public class HistoryScreen {
                 }
             }
         }
-
+        
         StringBuilder averageMetrics = new StringBuilder();
         if (bmiCount > 0) {
             double averageBMI = totalBMI / bmiCount;
@@ -255,6 +260,7 @@ public class HistoryScreen {
         if (averageMetricsLabel != null) {
             averageMetricsLabel.setText(averageMetrics.toString());
         }
+        averageMetrics.append("If you edited the values, average values will be refreshed if you go back and click 'history' tab again");
     }
     /**
      * Retrieves the metric value for a health data entry.
