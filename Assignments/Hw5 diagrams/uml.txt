@@ -1,0 +1,159 @@
+@startuml
+' Class representing User
+class User<T extends HealthData<?>> {
+  - firstName: String
+  - lastName: String
+  - email: String
+  - password: String
+  - dateOfBirth: Date
+  - gender: String
+  - phoneNumber: String
+  - healthDataList: ArrayList<T>
+  + User(firstName: String, lastName: String, email: String, password: String, dateOfBirth: Date, gender: String, phoneNumber: String)
+  + addHealthData(healthData: T): void
+  + removeHealthData(healthData: T): void
+  + editHealthData(index: int, newHealthData: T): void
+  + getHealthDataList(): ArrayList<T>
+  + getFullName(): String
+  + getEmail(): String
+  + setEmail(email: String): void
+  + getPhoneNumber(): String
+  + setPhoneNumber(phoneNumber: String): void
+}
+
+' Abstract class
+abstract class HealthData<T> {
+  - name: String
+  - date: Date
+  + HealthData(name: String, date: Date)
+  + getName(): String
+  + getDate(): Date
+  {abstract} +getMetric(): String
+  {abstract} +getData(): T
+}
+
+' Concrete class implementing HealthData
+class CommonHealthData {
+  +systolicBP: int
+  +diastolicBP: int
+  +ldlCholesterol: int
+  +hdlCholesterol: int
+  +triglycerideCholesterol: int
+  +glucoseLevel: int
+  +height: double
+  +weight: double
+  +CommonHealthData(date: Date, metric: String, systolicBP: int, diastolicBP: int)
+  +CommonHealthData(date: Date, metric: String, systolicBP: int, diastolicBP: int, ldlCholesterol: int)
+  +CommonHealthData(date: Date, metric: String, glucoseLevel: int)
+  +CommonHealthData(date: Date, metric: String, height: double, weight: double)
+  +validate(): void
+  +getSystolicBP(): int
+  +getDiastolicBP(): int
+  +getLdlCholesterol(): int
+  +getHdlCholesterol(): int
+  +getTriglycerideCholesterol(): int
+  +getGlucoseLevel(): int
+  +getHeight(): double
+  +getWeight(): double
+  +calculateBMI(): double
+}
+
+' Concrete class extending HealthData
+class CustomHealthData {
+  +notes: List<String>
+  +CustomHealthData(name: String, date: Date, note: String)
+  +addNote(note: String): void
+  +getNotes(): List<String>
+  +getMetric(): String
+  +getData(): String
+}
+
+' Class representing HealthMetricsReader
+class HealthMetricsReader {
+  {static} + readIdealValue(metric: String): double[]
+  {static} + readIdealValueConcurrently(metric: String): double[]
+}
+
+' Exception class
+class HealthDataException {
+  - message: String
+  + HealthDataException(message: String)
+  + getMessage(): String
+}
+
+' Association between User and HealthData (aggregation relationship)
+User "1" *-- "0..*" HealthData: healthDataList
+
+' Inheritance between HealthData and CommonHealthData
+HealthData <|-- CommonHealthData
+
+' Inheritance between HealthData and CustomHealthData
+HealthData <|-- CustomHealthData
+
+' Association between CommonHealthData and HealthDataException
+CommonHealthData "1" -- "0..*" HealthDataException: throws
+
+' Association between HealthMetricsReader and HealthDataException
+HealthMetricsReader --> HealthDataException
+
+' Class representing HealthDataChecker
+class HealthDataChecker {
+  {static} +checkBloodPressure(common: CommonHealthData): void
+  {static} +checkCholesterol(common: CommonHealthData): void
+  {static} +checkBloodGlucose(common: CommonHealthData): void
+  {static} +checkBMI(common: CommonHealthData): void
+  {static} +checkBloodPressureConcurrently(common: CommonHealthData): void
+  {static} +checkCholesterolConcurrently(common: CommonHealthData): void
+  {static} +checkBloodGlucoseConcurrently(common: CommonHealthData): void
+  {static} +checkBMIConcurrently(common: CommonHealthData): void
+}
+
+' Association between HealthDataChecker and HealthMetricsReader
+HealthDataChecker --> HealthMetricsReader
+
+' Class representing HealthDataEntry
+class HealthDataEntry {
+  - primaryStage: Stage
+  - healthDataEntryScene: Scene
+  - historyScene: Scene
+  - user: User<HealthData<?>>
+  - currentHealthData: HealthData<?>
+  - healthData: HealthData<CommonHealthData>
+  + setCurrentHealthData(currentHealthData: HealthData<?>): void
+  + HealthDataEntry(primaryStage: Stage, user: User<HealthData<?>>)
+  + showHealthDataEntryScene(): void
+  - createHealthDataEntryScene(): void
+  + showBloodPressureScene(): Scene
+  + showCholesterolScene(): Scene
+  + showBMIScene(): Scene
+  + showBloodSugarScene(): Scene
+  + showCustomHealthNoteScene(): Scene
+  - showHistoryScene(): void
+  + showHistoryScreen(): void
+  - showSuccessMessage(): void
+  + checkMetricsConcurrently(common: CommonHealthData): void
+}
+
+HealthDataEntry "1" -- "1" User
+HealthDataEntry "1" -- "0..1" HealthData
+HealthDataEntry --> CommonHealthData
+HealthDataEntry --> HealthDataChecker
+
+' Class representing HistoryScreen
+class HistoryScreen {
+  - user: User<HealthData<?>>
+  - tableView: TableView<HealthData<?>>
+  - data: ObservableList<HealthData<?>>
+  + HistoryScreen(user: User<HealthData<?>>)
+  + display(): void
+  - filterDataByDate(selectedDate: LocalDate): void
+  - calculateAverageMetrics(healthDataList: List<HealthData<?>>): void
+  - getMetricValue(healthData: HealthData<?>): String
+}
+
+' Association between HistoryScreen and User
+HistoryScreen "1" -- "1" User
+
+' Association between HistoryScreen and HealthData
+HistoryScreen "1" -- "0..*" HealthData
+@enduml
