@@ -12,6 +12,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 
 
@@ -20,7 +26,7 @@ public class HealthDataEntry {
     private Scene healthDataEntryScene;
     private TableView<HealthData<?>> tableView;
     private User<HealthData<?>> user;
-
+    private static final String url = "jdbc:sqlite:healthtracker.db";
 
     public Stage getPrimaryStage() {
         return primaryStage;
@@ -141,41 +147,68 @@ public class HealthDataEntry {
         submitButton.setOnAction(event -> {
             int systolicBP = Integer.parseInt(systolicBPTextField.getText());
             int diastolicBP = Integer.parseInt(diastolicBPTextField.getText());
-            if (isEdit) {
-                if (existingHealthData instanceof CommonHealthData) {
+
+            try (Connection conn = DriverManager.getConnection(url);
+                 Statement stmt = conn.createStatement()) {
+
+                // Fetch the user ID from the User table based on the user's email
+                String selectUserSql = "SELECT id FROM User WHERE email = '" + user.getEmail() + "'";
+                ResultSet resultSet = stmt.executeQuery(selectUserSql);
+                int userId = resultSet.getInt("id");
+
+                if (isEdit && existingHealthData instanceof CommonHealthData) {
                     CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
                     commonHealthData.setSystolicBP(systolicBP);
                     commonHealthData.setDiastolicBP(diastolicBP);
+
                     try {
                         commonHealthData.validate();
                     } catch (HealthDataException e) {
                         e.printStackTrace();
                     }
-                }
-                tableView.refresh();
-                Platform.runLater(() -> {
-                    Stage editbloodpreStage = (Stage) bloodPressureScene.getWindow();
-                    editbloodpreStage.close();
-                    bloodPressureStage.close();
-                });
-            } else {
-                String name = "Blood Pressure";
-                Date date = new Date();
-                Date originalDate = date;
-                String metric = "Blood Pressure";
-                CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, systolicBP, diastolicBP);
-                try {
-                    ((CommonHealthData) healthDataEntry).validate();
-                } catch (HealthDataException e) {
-                    e.printStackTrace();
-                }
-                user.addHealthData(healthDataEntry);
-                HealthDataChecker.checkBloodPressure(healthDataEntry);
 
-                Platform.runLater(() -> {
-                    bloodPressureStage.close();
-                    showHealthDataEntryScene();
-                });
+                    // Create the SQL UPDATE statement to update the blood pressure data
+                    String updateDataSql = "UPDATE BloodPressureData SET systolicBP = " + systolicBP
+                            + ", diastolicBP = " + diastolicBP + " WHERE userId = " + userId;
+
+                    // Execute the UPDATE statement
+                    stmt.executeUpdate(updateDataSql);
+
+                    tableView.refresh();
+                    Platform.runLater(() -> {
+                        Stage editbloodpreStage = (Stage) bloodPressureScene.getWindow();
+                        editbloodpreStage.close();
+                        bloodPressureStage.close();
+                    });
+                } else {
+                    // Create the SQL INSERT statement to insert the blood pressure data
+                    String insertDataSql = "INSERT INTO BloodPressureData (userId, systolicBP, diastolicBP, dateRecorded) VALUES ("
+                            + userId + ", " + systolicBP + ", " + diastolicBP + ", '" + new Date() + "')";
+
+                    // Execute the INSERT statement
+                    stmt.executeUpdate(insertDataSql);
+
+                    // Create a new health data entry and add it to the user's health data
+                    String name = "Blood Pressure";
+                    Date date = new Date();
+                    Date originalDate = date;
+                    String metric = "Blood Pressure";
+                    CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, systolicBP, diastolicBP);
+                    try {
+                        healthDataEntry.validate();
+                    } catch (HealthDataException e) {
+                        e.printStackTrace();
+                    }
+                    user.addHealthData(healthDataEntry);
+                    HealthDataChecker.checkBloodPressure(healthDataEntry);
+
+                    Platform.runLater(() -> {
+                        bloodPressureStage.close();
+                        showHealthDataEntryScene();
+                    });
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         });
 
@@ -184,6 +217,7 @@ public class HealthDataEntry {
 
         return bloodPressureScene;
     }
+
 
     /**
      * Shows the Cholesterol scene for data entry.
@@ -219,53 +253,85 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-                int ldlCholesterol = Integer.parseInt(ldlCholesterolTextField.getText());
-                int hdlCholesterol = Integer.parseInt(hdlCholesterolTextField.getText());
-                int triglycerideCholesterol = Integer.parseInt(triglycerideCholesterolTextField.getText());
-                if (isEdit) {
-                    if (existingHealthData instanceof CommonHealthData) {
-                        CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
-                        commonHealthData.setLdlCholesterol(ldlCholesterol);
-                        commonHealthData.setHdlCholesterol(hdlCholesterol);
-                        commonHealthData.setTriglycerideCholesterol(triglycerideCholesterol);
-                        try {
-                            commonHealthData.validate();
-                        } catch (HealthDataException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    tableView.refresh(); // Refresh the table view to reflect the changes
-                    Platform.runLater(() -> {
-                    	Stage editCholesterolStage = (Stage) cholesterolScene.getWindow();
-                    	editCholesterolStage.close();
-                    	cholesterolStage.close();
-                    });
-                } else {
-                    String name = "Cholesterol";
-                    Date date = new Date();
-                    Date originalDate = date;
-                    String metric = "Cholesterol";
+            int ldlCholesterol = Integer.parseInt(ldlCholesterolTextField.getText());
+            int hdlCholesterol = Integer.parseInt(hdlCholesterolTextField.getText());
+            int triglycerideCholesterol = Integer.parseInt(triglycerideCholesterolTextField.getText());
 
-                    CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, ldlCholesterol,
-                            hdlCholesterol, triglycerideCholesterol);
-                    try {
-                        ((CommonHealthData) healthDataEntry).validate();
-                    } catch (HealthDataException e) {
+            if (isEdit) {
+                if (existingHealthData instanceof CommonHealthData) {
+                    CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
+                    commonHealthData.setLdlCholesterol(ldlCholesterol);
+                    commonHealthData.setHdlCholesterol(hdlCholesterol);
+                    commonHealthData.setTriglycerideCholesterol(triglycerideCholesterol);
+
+                    try (Connection conn = DriverManager.getConnection(url);
+                         Statement stmt = conn.createStatement()) {
+
+                        // Create the SQL UPDATE statement to update the cholesterol data
+                        String selectUserSql = "SELECT id FROM User WHERE email = '" + user.getEmail() + "'";
+                        ResultSet resultSet = stmt.executeQuery(selectUserSql);
+                        int userId = resultSet.getInt("id");
+                        String updateDataSql = "UPDATE CholesterolData SET ldlCholesterol = " + ldlCholesterol
+                                + ", hdlCholesterol = " + hdlCholesterol + ", triglycerideCholesterol = " + triglycerideCholesterol
+                                + " WHERE userId = " + userId;
+
+                        // Execute the UPDATE statement
+                        stmt.executeUpdate(updateDataSql);
+
+                        commonHealthData.validate();
+                    } catch (SQLException | HealthDataException e) {
                         e.printStackTrace();
                     }
-                    user.addHealthData(healthDataEntry);
-                    HealthDataChecker.checkCholesterol(healthDataEntry);
-                    Platform.runLater(() -> {
-                    	cholesterolStage.close();
-                    	showHealthDataEntryScene();
-                    });
                 }
+
+                tableView.refresh(); // Refresh the table view to reflect the changes
+                Platform.runLater(() -> {
+                    Stage editCholesterolStage = (Stage) cholesterolScene.getWindow();
+                    editCholesterolStage.close();
+                    cholesterolStage.close();
+                });
+            } else {
+                String name = "Cholesterol";
+                Date date = new Date();
+                Date originalDate = date;
+                String metric = "Cholesterol";
+
+                CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, ldlCholesterol,
+                        hdlCholesterol, triglycerideCholesterol);
+
+                try (Connection conn = DriverManager.getConnection(url);
+                     Statement stmt = conn.createStatement()) {
+
+                    String selectUserSql = "SELECT id FROM User WHERE email = '" + user.getEmail() + "'";
+                    ResultSet resultSet = stmt.executeQuery(selectUserSql);
+                    int userId = resultSet.getInt("id");
+
+                    // Create the SQL INSERT statement to insert the cholesterol data
+                    String insertDataSql = "INSERT INTO CholesterolData (userId, ldlCholesterol, hdlCholesterol, triglycerideCholesterol, dateRecorded) VALUES ("
+                            + userId + ", " + ldlCholesterol + ", " + hdlCholesterol + ", " + triglycerideCholesterol + ", '" + originalDate + "')";
+
+                    // Execute the INSERT statement
+                    stmt.executeUpdate(insertDataSql);
+
+                    healthDataEntry.validate();
+                } catch (SQLException | HealthDataException e) {
+                    e.printStackTrace();
+                }
+
+                user.addHealthData(healthDataEntry);
+                HealthDataChecker.checkCholesterol(healthDataEntry);
+                Platform.runLater(() -> {
+                    cholesterolStage.close();
+                    showHealthDataEntryScene();
+                });
+            }
         });
 
         cholesterolStage.setScene(cholesterolScene);
         cholesterolStage.show();
         return cholesterolScene;
     }
+
     /**
      * Shows the BMI scene for data entry.
      * Precondition: Button exists and is clickable.
@@ -297,27 +363,50 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-           
-                double weight = Double.parseDouble(weightTextField.getText());
-                double height = Double.parseDouble(heightTextField.getText());
-                if (isEdit) {
-                    if (existingHealthData instanceof CommonHealthData) {
-                        CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
-                        commonHealthData.setWeight(weight);
-                        commonHealthData.setHeight(height);
-                        try {
-                            commonHealthData.validate();
-                        } catch (HealthDataException e) {
-                            e.printStackTrace();
-                        }
+            double weight = Double.parseDouble(weightTextField.getText());
+            double height = Double.parseDouble(heightTextField.getText());
+
+            try (Connection conn = DriverManager.getConnection(url);
+                 Statement stmt = conn.createStatement()) {
+
+                // Fetch the user ID from the User table based on the user's email
+                String selectUserSql = "SELECT id FROM User WHERE email = '" + user.getEmail() + "'";
+                ResultSet resultSet = stmt.executeQuery(selectUserSql);
+                int userId = resultSet.getInt("id");
+
+                if (isEdit && existingHealthData instanceof CommonHealthData) {
+                    CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
+                    commonHealthData.setWeight(weight);
+                    commonHealthData.setHeight(height);
+
+                    try {
+                        commonHealthData.validate();
+                    } catch (HealthDataException e) {
+                        e.printStackTrace();
                     }
-                    tableView.refresh(); // Refresh the table view to reflect the changes
+
+                    // Create the SQL UPDATE statement to update the BMI data
+                    String updateDataSql = "UPDATE BMIData SET weight = " + weight + ", height = " + height
+                            + " WHERE userId = " + userId;
+
+                    // Execute the UPDATE statement
+                    stmt.executeUpdate(updateDataSql);
+
+                    tableView.refresh();
                     Platform.runLater(() -> {
-                    	Stage editBmiStage = (Stage) bmiScene.getWindow();
-                    	editBmiStage.close();
-                    	bmiStage.close();
+                        Stage editBmiStage = (Stage) bmiScene.getWindow();
+                        editBmiStage.close();
+                        bmiStage.close();
                     });
                 } else {
+                    // Create the SQL INSERT statement to insert the BMI data
+                    String insertDataSql = "INSERT INTO BMIData (userId, weight, height, dateRecorded) VALUES ("
+                            + userId + ", " + weight + ", " + height + ", '" + new Date() + "')";
+
+                    // Execute the INSERT statement
+                    stmt.executeUpdate(insertDataSql);
+
+                    // Create a new health data entry and add it to the user's health data
                     String name = "BMI";
                     Date date = new Date();
                     Date originalDate = date;
@@ -325,19 +414,22 @@ public class HealthDataEntry {
 
                     CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, weight, height);
                     try {
-                        ((CommonHealthData) healthDataEntry).validate();
+                        healthDataEntry.validate();
                     } catch (HealthDataException e) {
                         e.printStackTrace();
                     }
                     user.addHealthData(healthDataEntry);
                     HealthDataChecker.checkBMI(healthDataEntry);
+
                     Platform.runLater(() -> {
-                    	bmiStage.close();
-                    	showHealthDataEntryScene();
+                        bmiStage.close();
+                        showHealthDataEntryScene();
                     });
                 }
-                  
-            });
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
 
         bmiStage.setScene(bmiScene);
         bmiStage.show();
@@ -372,33 +464,54 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-            
-                double glucoseLevel = Double.parseDouble(glucoseLevelTextField.getText());
+            double bloodSugarLevel = Double.parseDouble(glucoseLevelTextField.getText());
 
-                if (isEdit) {
-                    if (existingHealthData instanceof CommonHealthData) {
-                        CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
-                        commonHealthData.setGlucoseLevel(glucoseLevel);
-                        try {
-                            commonHealthData.validate();
-                        } catch (HealthDataException e) {
-                            e.printStackTrace();
-                        }
+            try (Connection conn = DriverManager.getConnection(url);
+                 Statement stmt = conn.createStatement()) {
+
+                // Fetch the user ID from the User table based on the user's email
+                String selectUserSql = "SELECT id FROM User WHERE email = '" + user.getEmail() + "'";
+                ResultSet resultSet = stmt.executeQuery(selectUserSql);
+                int userId = resultSet.getInt("id");
+
+                if (isEdit && existingHealthData instanceof CommonHealthData) {
+                    CommonHealthData commonHealthData = (CommonHealthData) existingHealthData;
+                    commonHealthData.setGlucoseLevel(bloodSugarLevel);
+
+                    try {
+                        commonHealthData.validate();
+                    } catch (HealthDataException e) {
+                        e.printStackTrace();
                     }
 
-                    tableView.refresh(); // Refresh the table view to reflect the changes
+                    // Create the SQL UPDATE statement to update the blood sugar data
+                    String updateDataSql = "UPDATE DiabetesData SET bloodSugarLevel = " + bloodSugarLevel
+                            + " WHERE userId = " + userId;
+
+                    // Execute the UPDATE statement
+                    stmt.executeUpdate(updateDataSql);
+
+                    tableView.refresh();
                     Platform.runLater(() -> {
-                    Stage editBloodSugarStage = (Stage) bloodSugarScene.getWindow();
-                    editBloodSugarStage.close();
-                    bloodSugarStage.close();
+                        Stage editBloodSugarStage = (Stage) bloodSugarScene.getWindow();
+                        editBloodSugarStage.close();
+                        bloodSugarStage.close();
                     });
                 } else {
+                    // Create the SQL INSERT statement to insert the blood sugar data
+                    String insertDataSql = "INSERT INTO DiabetesData (userId, bloodSugarLevel, dateRecorded) VALUES ("
+                            + userId + ", " + bloodSugarLevel + ", '" + new Date() + "')";
+
+                    // Execute the INSERT statement
+                    stmt.executeUpdate(insertDataSql);
+
+                    // Create a new health data entry and add it to the user's health data
                     String name = "Blood Glucose";
                     Date date = new Date();
                     Date originalDate = date;
                     String metric = "Blood Glucose";
 
-                    CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, glucoseLevel);
+                    CommonHealthData healthDataEntry = new CommonHealthData(name, originalDate, metric, bloodSugarLevel);
                     try {
                         healthDataEntry.validate();
                     } catch (HealthDataException e) {
@@ -406,18 +519,22 @@ public class HealthDataEntry {
                     }
                     user.addHealthData(healthDataEntry);
                     HealthDataChecker.checkBloodGlucose(healthDataEntry);
+
                     Platform.runLater(() -> {
-                    	bloodSugarStage.close();
-                    	showHealthDataEntryScene();
+                        bloodSugarStage.close();
+                        showHealthDataEntryScene();
                     });
                 }
-       
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         });
 
         bloodSugarStage.setScene(bloodSugarScene);
         bloodSugarStage.show();
         return bloodSugarScene;
     }
+
 
     /**
      * Shows the custom health note scene for data entry.
@@ -446,22 +563,42 @@ public class HealthDataEntry {
 
         // Handle submit button click event
         submitButton.setOnAction(event -> {
-           
-                String note = noteTextField.getText();
+            String note = noteTextField.getText();
 
-                if (isEdit) {
-                    if (existingHealthData instanceof CustomHealthData) {
-                        CustomHealthData customHealthData = (CustomHealthData) existingHealthData;
-                        // customHealthData.setNotes(note);
-                    }
+            try (Connection conn = DriverManager.getConnection(url);
+                 Statement stmt = conn.createStatement()) {
 
-                    tableView.refresh(); // Refresh the table view to reflect the changes
+                // Fetch the user ID from the User table based on the user's email
+                String selectUserSql = "SELECT id FROM User WHERE email = '" + user.getEmail() + "'";
+                ResultSet resultSet = stmt.executeQuery(selectUserSql);
+                int userId = resultSet.getInt("id");
+
+                if (isEdit && existingHealthData instanceof CustomHealthData) {
+                    CustomHealthData customHealthData = (CustomHealthData) existingHealthData;
+//                    customHealthData.setNotes(note);
+
+                    // Create the SQL UPDATE statement to update the custom health note data
+                    String updateDataSql = "UPDATE CustomHealthData SET note = '" + note
+                            + "' WHERE userId = " + userId;
+
+                    // Execute the UPDATE statement
+                    stmt.executeUpdate(updateDataSql);
+
+                    tableView.refresh();
                     Stage editCustomStage = (Stage) customHealthNoteScene.getWindow();
                     Platform.runLater(() -> {
-                    	editCustomStage.close();
-                    	customStage.close();
+                        editCustomStage.close();
+                        customStage.close();
                     });
                 } else {
+                    // Create the SQL INSERT statement to insert the custom health note data
+                    String insertDataSql = "INSERT INTO CustomHealthData (userId, note, dateRecorded) VALUES ("
+                            + userId + ", '" + note + "', '" + new Date() + "')";
+
+                    // Execute the INSERT statement
+                    stmt.executeUpdate(insertDataSql);
+
+                    // Create a new health data entry and add it to the user's health data
                     String name = "Custom Health Note";
                     Date date = new Date();
                     Date originalDate = date;
@@ -470,17 +607,20 @@ public class HealthDataEntry {
                     user.addHealthData(healthDataEntry);
                     customStage.close();
                     Platform.runLater(() -> {
-                    	showHealthDataEntryScene();
-                    	showSuccessMessage();
+                        showHealthDataEntryScene();
+                        showSuccessMessage();
                     });
                 }
-
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         });
 
         customStage.setScene(customHealthNoteScene);
         customStage.show();
         return customHealthNoteScene;
     }
+
 
 
     /**
@@ -499,6 +639,7 @@ public class HealthDataEntry {
         alert.setContentText("Health data entry saved successfully!");
         alert.showAndWait();
     }
+
     
 
     

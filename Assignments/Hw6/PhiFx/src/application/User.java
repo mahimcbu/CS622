@@ -1,5 +1,6 @@
 package application;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -10,12 +11,12 @@ public class User<T extends HealthData<?>> {
     private String lastName;
     private String email;
     private String password;
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
     private String gender;
     private String phoneNumber;
     private ArrayList<T> healthDataList;
 
-    public User(String firstName, String lastName, String email, String password, Date dateOfBirth, String gender, String phoneNumber) {
+    public User(String firstName, String lastName, String email, String password, LocalDate dateOfBirth, String gender, String phoneNumber) {
         if (!isValidEmail(email)) {
             throw new IllegalArgumentException("Invalid email address");
         }
@@ -24,9 +25,10 @@ public class User<T extends HealthData<?>> {
             throw new IllegalArgumentException("Invalid password");
         }
 
-        if (dateOfBirth.after(new Date())) {
+        if (dateOfBirth.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Invalid date of birth");
         }
+
 
         this.firstName = firstName;
         this.lastName = lastName;
@@ -64,7 +66,51 @@ public class User<T extends HealthData<?>> {
 
 
 
-    public ArrayList<T> getHealthDataList() {
+    public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public LocalDate getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(LocalDate dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public void setHealthDataList(ArrayList<T> healthDataList) {
+		this.healthDataList = healthDataList;
+	}
+
+	public ArrayList<T> getHealthDataList() {
         return healthDataList;
     }
 

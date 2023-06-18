@@ -8,23 +8,48 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.DatePicker;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-
-
 
 public class Main extends Application {
     private Stage primaryStage;
     private Scene loginScene;
     private Scene createUserScene;
     private HealthDataEntry healthDataEntry;
+    private User<HealthData<?>> user; // Declare user as an instance variable
 
+    private static final String url = "jdbc:sqlite:healthtracker.db";
+//    private void printUserRecords() {
+//        try (Connection conn = DriverManager.getConnection(url);
+//             Statement stmt = conn.createStatement()) {
+//            String selectUsersSql = "SELECT * FROM BmiData";
+//            ResultSet resultSet = stmt.executeQuery(selectUsersSql);
+//
+//            while (resultSet.next()) {
+//                String weight = resultSet.getString("weight");
+//                String height = resultSet.getString("height");
+////                String email = resultSet.getString("email");
+//                // Retrieve other columns as needed
+//
+//                System.out.println("weight: " + weight + " " + "height: " + height);
+//            }
+//        } catch (SQLException e) {
+//            System.out.println("Error retrieving user data: " + e.getMessage());
+//        }
+//    }
+    
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -37,11 +62,6 @@ public class Main extends Application {
         primaryStage.setTitle("Login/Create User");
         primaryStage.show();
     }
-
-    private Date convertToDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-    }
-
     private void createLoginScene() {
         // Create UI components for login scene
         Label usernameLabel = new Label("Username:");
@@ -74,17 +94,61 @@ public class Main extends Application {
             primaryStage.setScene(createUserScene);
         });
 
-        // Handle login button click event (placeholder action)
+        // Handle login button click event
         loginButton.setOnAction(event -> {
-            // Placeholder action, you can add your own logic here
-            String username = usernameTextField.getText();
+            String email = usernameTextField.getText();
             String password = passwordTextField.getText();
-            System.out.println("Logging in with username: " + username + ", password: " + password);
-            System.out.println("Use create user button for now as the login will be available after database connectivity is complete");
-//            healthDataEntry = new HealthDataEntry(primaryStage, user);
-//            healthDataEntry.showHealthDataEntryScene();
+
+            // Perform login validation
+            boolean loginSuccessful = validateLogin(email, password);
+
+            if (loginSuccessful) {
+                // Login successful
+                System.out.println("Login successful. Email: " + email);
+
+                // Proceed with further logic or switch to another scene
+                try (Connection conn = DriverManager.getConnection(url);
+                     Statement stmt = conn.createStatement()) {
+                    // Retrieve user data from the User table
+                	String getUserSql = "SELECT * FROM User WHERE email = '" + email + "'";
+                    ResultSet resultSet = stmt.executeQuery(getUserSql);
+
+                    if (resultSet.next()) {
+                        // Retrieve user data from the result set
+                        String firstName = resultSet.getString("firstName");
+                        String lastName = resultSet.getString("lastName");
+                        String storedEmail = resultSet.getString("email");
+                        String storedPassword = resultSet.getString("password");
+                        LocalDate dateOfBirth = resultSet.getObject("dateOfBirth", LocalDate.class);
+                        String gender = resultSet.getString("gender");
+                        String phoneNumber = resultSet.getString("phoneNumber");
+
+                        // Create User object
+                        user = new User<>(firstName, lastName, storedEmail, storedPassword, dateOfBirth, gender, phoneNumber);
+
+                        // Switch to the health data entry scene
+                        healthDataEntry = new HealthDataEntry(primaryStage, user);
+//                        printUserRecords();
+                        healthDataEntry.showHealthDataEntryScene();
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Error retrieving user data: " + e.getMessage());
+                }
+            } else {
+                // Login failed
+                System.out.println("Invalid email or password. Please try again.");
+
+                // Display an error message to the user
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Login Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Invalid email or password. Please try again.");
+                alert.showAndWait();
+            }
         });
     }
+
+
 
     private void createCreateUserScene() {
         // Create UI components for create user scene
@@ -133,34 +197,72 @@ public class Main extends Application {
             String gender = genderTextField.getText();
             String phoneNumber = phoneNumberTextField.getText();
 
-            try {
-                // Validate email and password inputs using User class methods
-            	User<HealthData<?>> user = new User<>(firstName, lastName, email, password, convertToDate(dateOfBirth), gender, phoneNumber);
-                healthDataEntry = new HealthDataEntry(primaryStage, user);
-                // Perform any additional operations with the created user object
-                // For example, save the user to a database
+            try (Connection conn = DriverManager.getConnection(url);
+                 Statement stmt = conn.createStatement()) {
+                // Check if the email already exists in the User table
+                String checkEmailSql = "SELECT * FROM User WHERE email = '" + email + "'";
+                ResultSet resultSet = stmt.executeQuery(checkEmailSql);
 
-                // Show a success message or provide feedback to the user
-                // Example: display a dialog
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("User Creation");
-                alert.setHeaderText(null);
-                alert.setContentText("User created successfully!");
-                alert.showAndWait();
+                if (resultSet.next()) {
+                    // Email already exists, show an error message
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("User Creation Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Email already exists. Please use a different email.");
+                    alert.showAndWait();
+                } else {
+                    // Email is unique, proceed with user creation
+                    // Create User object
+                    User<HealthData<?>> user = new User<>(firstName, lastName, email, password, dateOfBirth, gender, phoneNumber);
 
-                // Switch to the health data entry scene
-                healthDataEntry.showHealthDataEntryScene();
-            } catch (IllegalArgumentException e) {
-                // Show an error message or provide feedback to the user
-                // Example: display an error dialog
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Invalid Input");
-                alert.setHeaderText(null);
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
+                    // Insert the user into the User table
+                    String insertUserSql = "INSERT INTO User (firstName, lastName, email, password, dateOfBirth, gender, phoneNumber) VALUES ('"
+                            + user.getFirstName() + "', '"
+                            + user.getLastName() + "', '"
+                            + user.getEmail() + "', '"
+                            + user.getPassword() + "', '"
+                            + user.getDateOfBirth() + "', '"
+                            + user.getGender() + "', '"
+                            + user.getPhoneNumber() + "')";
+
+                    stmt.executeUpdate(insertUserSql);
+
+                    // Show a success message or provide feedback to the user
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("User Creation");
+                    alert.setHeaderText(null);
+                    alert.setContentText("User created successfully!");
+                    alert.showAndWait();
+
+                    // Switch to the health data entry scene
+                    healthDataEntry = new HealthDataEntry(primaryStage, user);
+                    healthDataEntry.showHealthDataEntryScene();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error creating user: " + e.getMessage());
             }
         });
     }
+
+
+    private java.sql.Date convertToDate(LocalDate localDate) {
+        return java.sql.Date.valueOf(localDate);
+    }
+
+    private boolean validateLogin(String email, String password) {
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement stmt = conn.createStatement()) {
+            // Query the User table to validate login credentials
+            String selectUserSql = "SELECT * FROM User WHERE email = '" + email + "' AND password = '" + password + "'";
+            ResultSet resultSet = stmt.executeQuery(selectUserSql);
+
+            return resultSet.next();
+        } catch (SQLException e) {
+            System.out.println("Error querying user: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     public static void main(String[] args) {
         launch(args);

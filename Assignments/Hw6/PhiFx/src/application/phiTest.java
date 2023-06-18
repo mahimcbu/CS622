@@ -2,6 +2,7 @@ package application;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,8 +12,11 @@ public class phiTest {
 	//It also test's the HealthData class
     @Test
     public void testPHI() {
-        User user = new User("John", "Doe", "johndoe@example.com", "Passw0rd",
-                new Date(), "Male", "555-1234");
+
+
+    	User<HealthData<?>> user = new User<>("John", "Doe", "john@example.com",
+    	        "password", LocalDate.now(), "Male", "1234567890");
+
 
         // Add common health data
         HealthData commonHealth1 = new CommonHealthData(user.getFullName(), new Date(), "Blood Pressure", 120, 60);

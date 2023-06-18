@@ -9,6 +9,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -24,8 +25,13 @@ public class HistoryScreenTest {
         Stage stage = new Stage();
 
         // Create a sample user object for testing
-        User<HealthData<?>> user = new User<>("John", "Doe", "john@example.com",
-                "password", new Date(), "Male", "1234567890");
+    
+
+     // ...
+
+     User<HealthData<?>> user = new User<>("John", "Doe", "john@example.com",
+             "password", LocalDate.now(), "Male", "1234567890");
+
 
         // Create HistoryScreen object for testing
         historyScreen = new HistoryScreen(user);
